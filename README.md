@@ -5,19 +5,38 @@
 
 Companion repository to the AI Council 2026 talk **"Runtime Architecture Patterns for Agents in Production"** by [Vasundra Srinivasan](https://www.linkedin.com/in/vasundrasrinivasan/) — AI Architect Director (Salesforce), O'Reilly author of *Data Engineering for Multimodal AI*, independent researcher.
 
-This repo packages the talk into five artifacts you can clone, read, and run:
+This repo packages the talk into six artifacts you can clone, read, and run:
 
 1. **Six runnable patterns** — [LangGraph](https://langchain-ai.github.io/langgraph/) by default, [Google ADK](https://google.github.io/adk-docs/) where it fits better.
 2. **One end-to-end example** — the 90-day contract renewal from the talk, composed from the patterns.
 3. **A curated, verified bibliography** — 30 papers grounding every pattern in either distributed-systems classics or recent agent-systems research. All arXiv IDs and DOIs verified.
 4. **Public data** — the IBM Telco Customer Churn dataset (7,043 real customer records, plus a fixed 100-row subset), projected into the talk's renewal state machine by `data/load_telco.py`.
 5. **An eval harness** — `evals/` ships a [τ-bench](https://arxiv.org/abs/2406.12045) adapter (Yao et al., [arXiv:2406.12045](https://arxiv.org/abs/2406.12045)) so the patterns can be evaluated against a published agent-runtime benchmark with `pass^k` consistency metrics.
+6. **A bring-your-own-dataset lab guide** — swap in any domain in under 15 minutes; see the [BYOD lab section](#bring-your-own-dataset--lab-guide) below.
 
 ---
 
-## The framework in one paragraph
+## The decision model: Runtime → Dimensions → Patterns
 
-Production LLM agents come in three runtimes — **Conversational** (seconds), **Autonomous** (minutes), **Long-Horizon** (days). Every production runtime has to answer three questions simultaneously: **how does work split and combine** (Coordination), **how does the system remember** (State), and **who decides what runs and when to stop** (Control). Six patterns answer those three questions. You don't pick one — you build at the intersection. **State is the spine. Coordination wraps it. Control bounds it.**
+There is a specific sequence for making architecture decisions. Start at the runtime, not the pattern.
+
+**Runtime decides the execution environment.** Your problem lives in one of three runtimes, and that is not a tool choice — it is a constraint imposed by the problem itself:
+
+| Runtime | Time horizon | What this environment demands |
+|---------|-------------|-------------------------------|
+| **Conversational** | Seconds | Sub-second decisions; every gate adds visible latency |
+| **Autonomous** | Minutes | Fan-out to specialists; some will fail; side-effects need undo |
+| **Long-Horizon** | Days | Durability, resumability, and auditability are load-bearing |
+
+**Dimensions drive the engineering decisions.** Each runtime creates pressure on three dimensions — the problems you *must* solve to make that runtime reliable in production:
+
+- **Coordination** — how does work split and combine across agents?
+- **State** — how does the system remember across steps, restarts, and failures?
+- **Control** — who decides what runs, enforces policy, and knows when to stop?
+
+The runtime does not stress all three equally. A Conversational runtime puts maximum pressure on Control. An Autonomous runtime stresses Coordination. A Long-Horizon runtime makes State load-bearing.
+
+**Patterns are how you solve each dimension.** Six patterns map directly onto the three dimensions. You don't pick one — you build at the intersection. **State is the spine. Coordination wraps it. Control bounds it.**
 
 ```
                   ┌──────────────────────────────────────────────────────┐
