@@ -7,7 +7,7 @@ Companion repository to the AI Council 2026 talk **"Runtime Architecture Pattern
 
 This repo packages the talk into five artifacts you can clone, read, and run:
 
-1. **Six runnable patterns** — LangGraph by default, Google ADK where it fits better.
+1. **Six runnable patterns** — [LangGraph](https://langchain-ai.github.io/langgraph/) by default, [Google ADK](https://google.github.io/adk-docs/) where it fits better.
 2. **One end-to-end example** — the 90-day contract renewal from the talk, composed from the patterns.
 3. **A curated, verified bibliography** — 30 papers grounding every pattern in either distributed-systems classics or recent agent-systems research. All arXiv IDs and DOIs verified.
 4. **Public data** — the IBM Telco Customer Churn dataset (7,043 real customer records, plus a fixed 100-row subset), projected into the talk's renewal state machine by `data/load_telco.py`.
@@ -44,12 +44,12 @@ Production LLM agents come in three runtimes — **Conversational** (seconds), *
 
 | # | Pattern | Dimension | Primary stack | When to reach for it |
 |---|---------|-----------|---------------|----------------------|
-| **P1** | [Hierarchical Delegation](patterns/p1-hierarchical-delegation/) | Coordination | LangGraph + ADK | One owner of the work, N specialists, deterministic merge |
-| **P2** | [Scatter-Gather + Saga](patterns/p2-scatter-gather-saga/) | Coordination | LangGraph | Parallel fan-out where some peers will fail and writes need undo |
-| **P3** | [Event-Driven Sequencing](patterns/p3-event-driven-sequencing/) | State | LangGraph | The log is the source of truth; consumers are commentary |
-| **P4** | [Supervisor + Gate](patterns/p4-supervisor-gate/) | Control | LangGraph | Restart what's dead, refuse what's out-of-policy, audit everything |
-| **P5** | [Shared State Machine](patterns/p5-shared-state-machine/) | State | LangGraph | Long-horizon work that pauses, resumes, and tolerates restarts |
-| **P6** | [Human in the Loop](patterns/p6-human-in-the-loop/) | Control | Google ADK | The four control planes: kill switch, escalation, approval, throttling |
+| **P1** | [Hierarchical Delegation](patterns/p1-hierarchical-delegation/) | Coordination | [LangGraph](https://langchain-ai.github.io/langgraph/) + [Google ADK](https://google.github.io/adk-docs/) | One owner of the work, N specialists, deterministic merge |
+| **P2** | [Scatter-Gather + Saga](patterns/p2-scatter-gather-saga/) | Coordination | [LangGraph](https://langchain-ai.github.io/langgraph/) | Parallel fan-out where some peers will fail and writes need undo |
+| **P3** | [Event-Driven Sequencing](patterns/p3-event-driven-sequencing/) | State | [LangGraph](https://langchain-ai.github.io/langgraph/) | The log is the source of truth; consumers are commentary |
+| **P4** | [Supervisor + Gate](patterns/p4-supervisor-gate/) | Control | [LangGraph](https://langchain-ai.github.io/langgraph/) | Restart what's dead, refuse what's out-of-policy, audit everything |
+| **P5** | [Shared State Machine](patterns/p5-shared-state-machine/) | State | [LangGraph](https://langchain-ai.github.io/langgraph/) | Long-horizon work that pauses, resumes, and tolerates restarts |
+| **P6** | [Human in the Loop](patterns/p6-human-in-the-loop/) | Control | [Google ADK](https://google.github.io/adk-docs/) | The four control planes: kill switch, escalation, approval, throttling |
 
 Each pattern directory contains:
 
@@ -73,6 +73,22 @@ Each pattern directory contains:
 - recent agent-systems papers (AutoGen, MetaGPT, HuggingGPT, CAMEL, AgentVerse, GuardAgent, NeMo Guardrails, MAST, DSPy, Reflexion, Constitutional AI, multi-agent debate)
 
 If you find a broken link or a citation that doesn't resolve, file an issue.
+
+---
+
+## Prerequisites
+
+New to these frameworks? Start here before cloning.
+
+| What you need | Why | Where to get it |
+|---------------|-----|-----------------|
+| **Python 3.10+** | Required runtime | [python.org/downloads](https://www.python.org/downloads/) — run `python --version` to check |
+| **[LangGraph](https://langchain-ai.github.io/langgraph/)** | Graph runtime powering P1–P5 | [Docs](https://langchain-ai.github.io/langgraph/) · [Quickstart](https://langchain-ai.github.io/langgraph/tutorials/introduction/) · [GitHub](https://github.com/langchain-ai/langgraph) |
+| **[Google ADK](https://google.github.io/adk-docs/)** | Agent runtime for P1 + P6 variants | [Docs](https://google.github.io/adk-docs/) · [GitHub](https://github.com/google/adk-python) · [Quickstart](https://google.github.io/adk-docs/get-started/quickstart/) |
+| **[LangChain](https://python.langchain.com/)** | Model connectors (Anthropic, OpenAI) | Installed automatically via `requirements.txt` |
+| **API key** *(optional)* | Only needed for real LLM calls | [Anthropic Console](https://console.anthropic.com/) or [OpenAI Platform](https://platform.openai.com/) |
+
+> All six patterns ship with a **stub LLM** — every example runs fully offline out of the box. You do not need an API key to explore the structure or swap in your own data.
 
 ---
 
@@ -100,6 +116,129 @@ python evals/run_eval.py --k 4 --limit 10
 ```
 
 To wire a real LLM, export `ANTHROPIC_API_KEY` or `OPENAI_API_KEY` and set `USE_REAL_LLM=1`. To run a live τ-bench eval, also `pip install git+https://github.com/sierra-research/tau-bench` and pass `--live`.
+
+---
+
+## Bring Your Own Dataset — lab guide
+
+The telco renewal scenario is just the default skin. The patterns are domain-agnostic — swap three things and you're running your own data in under 15 minutes.
+
+### Which pattern fits your problem?
+
+| Your scenario | Pattern |
+|--------------|---------|
+| One coordinator, multiple specialist steps, deterministic merge | **[P1](patterns/p1-hierarchical-delegation/)** Hierarchical Delegation |
+| Parallel checks where some may fail and you need compensating rollback | **[P2](patterns/p2-scatter-gather-saga/)** Scatter-Gather + Saga |
+| Audit trail is critical; you need replay, branching, or time-travel debug | **[P3](patterns/p3-event-driven-sequencing/)** Event-Driven Sequencing |
+| Agents crash in prod and side-effects need policy enforcement before they fire | **[P4](patterns/p4-supervisor-gate/)** Supervisor + Gate |
+| Long-running job that pauses overnight, resumes, and tolerates restarts | **[P5](patterns/p5-shared-state-machine/)** Shared State Machine |
+| Humans must be able to approve, escalate, kill, or throttle at runtime | **[P6](patterns/p6-human-in-the-loop/)** Human in the Loop |
+
+### The three swap points (P1–P4)
+
+Every LangGraph pattern (`langgraph_example.py`) has exactly three places to touch:
+
+**1. The state `TypedDict` — rename fields to your domain**
+
+```python
+# Default (telco renewal)
+class RenewalState(TypedDict, total=False):
+    renewal_id: str
+    customer:   dict[str, Any]
+    churn:      dict[str, Any]   # sub-agent output
+    offer:      dict[str, Any]   # sub-agent output
+    decision:   dict[str, Any]   # merged result
+    failures:   Annotated[list[str], operator.add]
+
+# Your domain (e.g. medical triage)
+class TriageState(TypedDict, total=False):
+    case_id:    str
+    patient:    dict[str, Any]
+    risk:       dict[str, Any]   # sub-agent output
+    treatment:  dict[str, Any]   # sub-agent output
+    disposition: dict[str, Any]  # merged result
+    failures:   Annotated[list[str], operator.add]
+```
+
+Rename the class and its fields. Graph wiring, parallel fan-out, and merge logic are structurally unchanged — only field names move.
+
+**2. The sub-agent stubs — replace hardcoded returns with your logic**
+
+```python
+# Default stub — always returns the same canned dict
+def sub_churn(state: RenewalState) -> RenewalState:
+    return {"churn": {"score": 0.72, "drivers": ["plan_eol"]}}
+
+# Your version — call a real LLM (needs USE_REAL_LLM=1 and an API key)
+def sub_risk(state: TriageState) -> TriageState:
+    from _common import get_llm
+    llm = get_llm()
+    result = llm.invoke(f"Assess urgency: {state['patient']}")
+    return {"risk": {"level": result, "source": "llm"}}
+```
+
+**3. The `app.invoke({...})` call — feed your records**
+
+```python
+# Single record
+result = app.invoke({"case_id": "C-001", "patient": {"age": 45, "condition": "..."}})
+
+# Loop over a CSV
+import csv
+with open("my_data.csv") as f:
+    for row in csv.DictReader(f):
+        result = app.invoke({"case_id": row["id"], "patient": dict(row)})
+        print(result.get("disposition"))
+
+# Loop over a JSON file
+import json
+for record in json.load(open("my_data.json")):
+    result = app.invoke({"case_id": record["id"], "patient": record})
+```
+
+### P5 — Shared State Machine: one extra step
+
+P5 also has an `ALLOWED_TRANSITIONS` dict that encodes your workflow's valid state moves. Update it to match your domain's lifecycle:
+
+```python
+# Default (renewal lifecycle)
+ALLOWED_TRANSITIONS = {
+    "pending":        {"scoring"},
+    "scoring":        {"offer_sent", "human_required"},
+    "offer_sent":     {"closed", "human_required", "expired"},
+    "human_required": {"offer_sent", "closed", "expired"},
+}
+
+# Your domain (e.g. order fulfilment)
+ALLOWED_TRANSITIONS = {
+    "received":   {"validated"},
+    "validated":  {"picking", "on_hold"},
+    "picking":    {"packed", "on_hold"},
+    "packed":     {"shipped"},
+    "shipped":    {"delivered", "returned"},
+}
+```
+
+### P6 — Human in the Loop: configure the four control planes
+
+P6's swap points are thresholds, not field names. In `adk_example.py`, find and adjust:
+
+| Plane | Variable to change | Default |
+|-------|-------------------|---------|
+| Kill switch | `CancellationToken.revoked` — call `.revoke()` from your orchestration layer | manual |
+| Escalation | `suspend(reason=...)` inside the agent body | on any exception |
+| Approval | `APPROVAL_TIMEOUT_S` | `5` seconds |
+| Throttling | `RATE_LIMIT` (calls/min) and `BUDGET_LIMIT` ($/day) | `3` / `1.0` |
+
+### Wiring a real LLM
+
+```bash
+export ANTHROPIC_API_KEY=sk-ant-...   # or OPENAI_API_KEY=sk-...
+export USE_REAL_LLM=1
+python patterns/p1-hierarchical-delegation/langgraph_example.py
+```
+
+`get_llm()` in [`patterns/_common.py`](patterns/_common.py) picks up the key automatically — Anthropic is tried first, then OpenAI. No other changes needed.
 
 ## Data and citations at a glance
 
