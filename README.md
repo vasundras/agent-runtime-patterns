@@ -11,7 +11,7 @@ This repo packages the talk into five artifacts you can clone, read, and run:
 2. **One end-to-end example** — the 90-day contract renewal from the talk, composed from the patterns.
 3. **A curated, verified bibliography** — 30 papers grounding every pattern in either distributed-systems classics or recent agent-systems research. All arXiv IDs and DOIs verified.
 4. **Public data** — the IBM Telco Customer Churn dataset (7,043 real customer records, plus a fixed 100-row subset), projected into the talk's renewal state machine by `data/load_telco.py`.
-5. **An eval harness** — `evals/` ships a τ-bench adapter (Yao et al., arXiv:2406.12045) so the patterns can be evaluated against a published agent-runtime benchmark with `pass^k` consistency metrics.
+5. **An eval harness** — `evals/` ships a [τ-bench](https://arxiv.org/abs/2406.12045) adapter (Yao et al., [arXiv:2406.12045](https://arxiv.org/abs/2406.12045)) so the patterns can be evaluated against a published agent-runtime benchmark with `pass^k` consistency metrics.
 
 ---
 
@@ -79,7 +79,7 @@ If you find a broken link or a citation that doesn't resolve, file an issue.
 ## Quick start
 
 ```bash
-git clone <this-repo>
+git clone https://github.com/vasundras/agent-runtime-patterns
 cd agent-runtime-patterns
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
@@ -104,7 +104,7 @@ To wire a real LLM, export `ANTHROPIC_API_KEY` or `OPENAI_API_KEY` and set `USE_
 ## Data and citations at a glance
 
 - **Customer corpus**: IBM Telco Customer Churn (7,043 rows, CC0-equivalent license). See [`data/SOURCES.md`](data/SOURCES.md).
-- **Eval target**: τ-bench (Yao, Shinn, Razavi, Narasimhan, arXiv:2406.12045, Apache 2.0). See [`evals/README.md`](evals/README.md).
+- **Eval target**: [τ-bench — Yao, Shinn, Razavi, Narasimhan (arXiv:2406.12045)](https://arxiv.org/abs/2406.12045), Apache 2.0. See [`evals/README.md`](evals/README.md).
 - **Bibliography**: [`papers/CURATED_BIBLIOGRAPHY.md`](papers/CURATED_BIBLIOGRAPHY.md) — 30 papers verified 2026-05-13; see [`papers/VERIFICATION_REPORT.md`](papers/VERIFICATION_REPORT.md) for the audit table.
 
 ---
@@ -113,7 +113,7 @@ To wire a real LLM, export `ANTHROPIC_API_KEY` or `OPENAI_API_KEY` and set `USE_
 
 - **Not a framework.** LangGraph and ADK are tools; the patterns are the substrate. The same six patterns reappear in Temporal, Restate, Inngest, durable-objects, BPMN engines.
 - **Not exhaustive.** Six patterns won't cover RAG indexing, eval pipelines, prompt-management, model-router selection. Those are upstream of the runtime.
-- **Not opinion-free.** Two strong claims in the talk are preserved here: (a) *don't do multi-agent debate, do contracts*; (b) *build the operations console before the agent*.
+- **Grounded in the current state of the field.** Two strong positions from the talk reflect where the evidence stands today: (a) *prefer contracts over multi-agent debate*; (b) *build the operations console before the agent*. The agent-systems space is evolving fast — these positions will be revisited as the field matures.
 
 ---
 
