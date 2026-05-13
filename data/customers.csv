@@ -1,0 +1,5 @@
+# This synthetic file has been REPLACED by the IBM Telco Customer Churn dataset.
+# See: data/telco_customer_churn_subset.csv  (100 rows, fixed sample)
+#      data/telco_customer_churn_full.csv    (7,043 rows, full corpus)
+#      data/load_telco.py                    (loader with renewal_id mapping)
+# This stub file is kept only so old paths in early git history still resolve.

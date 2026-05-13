@@ -1,0 +1,36 @@
+[           log] append  id='e1' type='usage_drop'
+[           log] append  id='e2' type='plan_eol'
+[           log] append  id='e3' type='accepted'
+[ churn_watcher] scoring  customer='C1'
+[           log] append  id='9e52de3f-2239-48fc-9c96-f73bb7121861' type='churn_score'
+[migration_agent] proposing migration  from_='legacy_v1'
+[           log] append  id='5f27a5c3-7fd8-40d0-82b7-5818ecf8360a' type='migration_offer'
+[        closer] closing renewal  customer='C1'
+[           log] append  id='0b8c394e-9540-4af5-9187-a4ffbdda7b8a' type='renewal_closed'
+[      snapshot] final log size  n=6
+[         event] usage_drop  id='e1' payload={'customer': 'C1', 'delta_pct': -30}
+[         event] plan_eol  id='e2' payload={'customer': 'C1', 'plan': 'legacy_v1'}
+[         event] accepted  id='e3' payload={'customer': 'C1', 'offer': 'premium_v2'}
+[         event] churn_score  id='9e52de3f-2239-48fc-9c96-f73bb7121861' payload={'customer': 'C1', 'score': 0.81}
+[         event] migration_offer  id='5f27a5c3-7fd8-40d0-82b7-5818ecf8360a' payload={'customer': 'C1', 'to_plan': 'premium_v2'}
+[         event] renewal_closed  id='0b8c394e-9540-4af5-9187-a4ffbdda7b8a' payload={'customer': 'C1'}
+[        replay] rewinding to event 0
+[          idem] skip (already processed)  consumer='churn_watcher' key='churn_watcher:e1'
+[          idem] skip (already processed)  consumer='migration_agent' key='migration_agent:e1'
+[          idem] skip (already processed)  consumer='closer' key='closer:e1'
+[          idem] skip (already processed)  consumer='churn_watcher' key='churn_watcher:e2'
+[          idem] skip (already processed)  consumer='migration_agent' key='migration_agent:e2'
+[          idem] skip (already processed)  consumer='closer' key='closer:e2'
+[          idem] skip (already processed)  consumer='churn_watcher' key='churn_watcher:e3'
+[          idem] skip (already processed)  consumer='migration_agent' key='migration_agent:e3'
+[          idem] skip (already processed)  consumer='closer' key='closer:e3'
+[          idem] skip (already processed)  consumer='churn_watcher' key='churn_watcher:9e52de3f-2239-48fc-9c96-f73bb7121861'
+[          idem] skip (already processed)  consumer='migration_agent' key='migration_agent:9e52de3f-2239-48fc-9c96-f73bb7121861'
+[          idem] skip (already processed)  consumer='closer' key='closer:9e52de3f-2239-48fc-9c96-f73bb7121861'
+[          idem] skip (already processed)  consumer='churn_watcher' key='churn_watcher:5f27a5c3-7fd8-40d0-82b7-5818ecf8360a'
+[          idem] skip (already processed)  consumer='migration_agent' key='migration_agent:5f27a5c3-7fd8-40d0-82b7-5818ecf8360a'
+[          idem] skip (already processed)  consumer='closer' key='closer:5f27a5c3-7fd8-40d0-82b7-5818ecf8360a'
+[          idem] skip (already processed)  consumer='churn_watcher' key='churn_watcher:0b8c394e-9540-4af5-9187-a4ffbdda7b8a'
+[          idem] skip (already processed)  consumer='migration_agent' key='migration_agent:0b8c394e-9540-4af5-9187-a4ffbdda7b8a'
+[          idem] skip (already processed)  consumer='closer' key='closer:0b8c394e-9540-4af5-9187-a4ffbdda7b8a'
+[          done] no duplicates emitted ✓

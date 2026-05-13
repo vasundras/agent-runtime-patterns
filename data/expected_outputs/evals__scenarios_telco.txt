@@ -1,0 +1,36 @@
+Built 100 τ-bench-style scenarios from Telco subset
+Distribution by expected outcome:
+  renewed               71
+  churned               23
+  restructured           4
+  escalated              2
+
+Sample scenario:
+{
+  "task_id": "r-2be9ac8c",
+  "domain": "telco_renewal",
+  "initial_db": {
+    "renewal_id": "r-2be9ac8c",
+    "customer_id": "7493-TPUWZ",
+    "state": "scoring",
+    "version": 0,
+    "monthly_charges": 79.15,
+    "contract": "Month-to-month",
+    "tenure": 1
+  },
+  "goal": {
+    "state": "expired",
+    "outcome": "churned"
+  },
+  "allowed_tools": [
+    "lookup_customer",
+    "score_churn",
+    "draft_offer",
+    "publish_offer",
+    "request_human_review",
+    "accept_renewal",
+    "expire_renewal"
+  ],
+  "policy_doc": "Renewal policy v7 (effective 2026-01-01)\n\n- Discount above 30% is NEVER auto-approved; route to human review.\n- Contract mergers require human specialist + counsel.\n- Two-year customers in good standing may be offered up to 30% off as renewal incentive.\n- Month-to-month accounts with tenure >= 12 months may be offered annual contracts.\n- Throttling: maximum 60 tool-calls per minute per renewal.",
+  "user_intent": "I want to cancel my service."
+}

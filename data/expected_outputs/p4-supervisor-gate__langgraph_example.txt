@@ -1,0 +1,23 @@
+[          init] P4 supervisor + gate demo
+[ child:crawler] tick  iter=1
+[  child:scorer] tick  iter=1
+[    supervisor] child died  name='crawler' err='crawler crashed on iter 2'
+[  child:scorer] tick  iter=2
+[    supervisor] restarting child  name='crawler' backoff_s=0.05
+[ child:crawler] tick  iter=3
+[  child:scorer] tick  iter=3
+[ child:crawler] tick  iter=4
+[    supervisor] child died  name='scorer' err='scorer crashed on iter 4'
+[ child:crawler] tick  iter=5
+[    supervisor] restarting child  name='scorer' backoff_s=0.05
+[  child:scorer] tick  iter=5
+[ child:crawler] tick  iter=6
+[  child:scorer] tick  iter=6
+[           ---] now the gate ---
+[          gate] decision  action='apply_discount' allow=True reason='within envelope'
+[          gate] decision  action='apply_discount' allow=False reason='discount 90% > max 30%'
+[          gate] decision  action='auto_close' allow=True reason='default allow'
+[         audit] trail length  n=3
+[         audit] apply_discount  allow=True reason='within envelope'
+[         audit] apply_discount  allow=False reason='discount 90% > max 30%'
+[         audit] auto_close  allow=True reason='default allow'

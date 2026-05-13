@@ -1,0 +1,47 @@
+# Renewal policy — consumed by P4 (gate) and P6 (HITL)
+# Bump `version` whenever the rules change; the audit trail records the version that
+# decided each side-effect, so you can replay history under any policy version.
+
+version: v7
+effective_from: 2026-01-01
+
+discount:
+  # Hard ceiling. Anything above is auto-denied at the gate.
+  max_pct: 30
+  # Soft warn — gate allows but logs WARN and routes to a sampled review queue.
+  warn_pct: 20
+  # Per-tenant overrides (whitelist).
+  overrides:
+    C-001: 35     # Acme Corp — strategic
+    C-012: 40     # Larkspur Bank — strategic
+
+auto_close:
+  enabled: true
+  max_term_months: 36
+  require_human_for_mergers: true
+
+throttle:
+  # Tightest cap wins.
+  per_min: 60
+  daily_dollars_cap: 100.00
+  per_tenant_per_hour: 12
+
+escalation_triggers:
+  - kind: contract_merger
+    require: human_specialist
+  - kind: discount_over_policy
+    require: counsel + human_specialist
+  - kind: pii_present
+    require: privacy_officer
+
+kill_switch:
+  # Who is allowed to revoke a cancellation token without an incident ticket.
+  authorized_principals:
+    - role:director_ai
+    - role:vp_engineering
+    - role:on_call_engineer
+
+audit:
+  retention_days: 2555  # 7 years
+  pii_redaction: true
+  log_decision_lineage: true

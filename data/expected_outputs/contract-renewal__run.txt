@@ -1,0 +1,18 @@
+[       trigger] open window  renewal_id='r-8f3a'
+[            p4] gate allow  action='open_window'
+[            p5] cas → window_open  id='r-8f3a' v=1
+[            p1] orchestrator dispatch  agents=['churn', 'offer', 'contract']
+[            p1] sub:churn ok  score=0.72
+[            p1] sub:offer ok  discount=90
+[            p1] sub:contract ok (wrote CRM)  crm_id='crm-r-8f3a-0'
+[            p2] scatter-gather complete  results=3 saga=False
+[            p5] cas → scoring  id='r-8f3a' v=2
+[            p3] event appended  type='product_eol' id='8e9e1c0c'
+[            p5] absorbed mid-flight event into row data
+[            p4] gate DENY  reason='discount 90% > max 30%'
+[            p5] cas → human_required  id='r-8f3a' v=3
+[            p6] escalation — workflow paused  workflow_id='r-8f3a' reason='discount_out_of_policy'
+[           end] paused for human review  id='r-8f3a'
+[         audit] final store  state='human_required' v=3
+[         audit] events  n=1
+[         audit] suspended  n=1

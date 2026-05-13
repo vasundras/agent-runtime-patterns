@@ -1,0 +1,5 @@
+[       propose] agent drafts action  id='wf-42'
+[        paused] state after interrupt  out={'workflow_id': 'wf-42', 'proposed_action': {'discount_pct': 50, 'publish': True}}
+[         human] denies the action
+[       execute] halted — no human approval
+[          done] halted

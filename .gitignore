@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+env/
+ENV/
+build/
+dist/
+*.egg-info/
+.eggs/
+*.egg
+
+# Notebook
+.ipynb_checkpoints/
+
+# Local state from pattern examples
+*.db
+*.sqlite
+*.log
+.checkpoints/
+event_log.jsonl
+state_store.json
+
+# Editor
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# arXiv paper drafts (not for public repo)
+arxiv/
+
+# Claude Code local settings
+.claude/

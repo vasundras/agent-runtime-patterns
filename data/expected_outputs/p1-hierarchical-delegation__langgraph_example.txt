@@ -1,0 +1,13 @@
+[          init] starting hierarchical delegation  llm='StubLLM'
+[     sub:churn] scoring churn  id='r-8f3a'
+[  sub:contract] building contract  id='r-8f3a'
+[     sub:offer] drafting offer  id='r-8f3a'
+[  orchestrator] merged  decision={'renewal_id': 'r-8f3a', 'action': 'renew', 'offer': {'plan': 'premium_2yr', 'discount_pct': 15}, 'contract': {'term_months': 24, 'auto_renew': True}, 'partial': False}
+[          done] happy path  action='renew' partial=False
+[     sub:churn] scoring churn  id='r-9c11'
+[  sub:contract] building contract  id='r-9c11'
+[     sub:offer] drafting offer  id='r-9c11'
+[     sub:offer] TIMEOUT (simulated)
+[  orchestrator] applying partial-result fallback  failures=['offer:timeout']
+[  orchestrator] merged  decision={'renewal_id': 'r-9c11', 'action': 'renew', 'offer': {'plan': 'renew_same', 'discount_pct': 0, 'fallback': True}, 'contract': {'term_months': 24, 'auto_renew': True}, 'partial': True}
+[          done] with timeout  action='renew' partial=True

@@ -1,0 +1,7 @@
+[          eval] running offline dry-run on 5 scenarios with k=1
+[          eval] agent stop  step=1
+[          eval] agent stop  step=1
+[          eval] agent stop  step=1
+[          eval] agent stop  step=1
+[          eval] summary  overall_pass_at_k=0.0 scenarios=5
+[          eval] wrote  path='/sessions/zen-tender-shannon/mnt/AI Council Compilation/agent-runtime-patterns/evals/results/dry_run_k1.json'

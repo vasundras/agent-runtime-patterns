@@ -1,0 +1,4 @@
+[          init] τ-bench adapter — self-test
+[          init] tau-bench not installed — running offline structural check
+[          eval] agent stop  step=3
+[          eval] self-test result  result={'renewal_id': 'r-fake-123', 'final_state': 'init', 'version': 3, 'audit': [{'step': 0, 'action': {'type': 'score_churn', 'customer_id': 'C-001'}, 'reward': 0.0}, {'step': 1, 'action': {'type': 'draft_offer', 'discount_pct': 15}, 'reward': 0.0}, {'step': 2, 'action': {'type': 'publish_offer'}, 'reward': 0.0}], 'policy_version': 'v7'}

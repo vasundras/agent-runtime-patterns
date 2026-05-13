@@ -1,0 +1,26 @@
+[          init] P6 four control planes
+[           ---] scenario A · escalation
+[        worker] did step  id='wf-A' step=0
+[        worker] did step  id='wf-A' step=1
+[    escalation] suspended (durable)  workflow_id='wf-A' reason='merger_of_two_contracts'
+[           ---] scenario B · approval (SLA elapses → deny)
+[        worker] did step  id='wf-B' step=0
+[      approval] requested  action={'action': 'publish_offer', 'discount_pct': 50} sla_s=0.2
+[      approval] SLA elapsed — falling back to deny (conservative)
+[        worker] approval denied, halting  id='wf-B' step=1
+[           ---] scenario C · throttle ($/day cap)
+[        worker] did step  id='wf-C' step=0
+[        worker] did step  id='wf-C' step=1
+[      throttle] DENY  reason='$/day cap' est=10 spent=20.0
+[        worker] throttled, skipping step  id='wf-C' step=2
+[      throttle] DENY  reason='$/day cap' est=10 spent=20.0
+[        worker] throttled, skipping step  id='wf-C' step=3
+[      throttle] DENY  reason='$/day cap' est=10 spent=20.0
+[        worker] throttled, skipping step  id='wf-C' step=4
+[           ---] scenario D · kill switch
+[        worker] did step  id='wf-D' step=0
+[        worker] did step  id='wf-D' step=1
+[        worker] did step  id='wf-D' step=2
+[   kill_switch] REVOKED — agent will halt at next checkpoint
+[          main] halted by kill switch  err='CancellationToken revoked'
+[         audit] suspend queue  entries=[{'workflow_id': 'wf-A', 'reason': 'merger_of_two_contracts', 'at': 1778675885.4055278}]

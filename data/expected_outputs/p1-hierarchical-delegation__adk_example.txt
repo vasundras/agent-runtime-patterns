@@ -1,0 +1,5 @@
+[          init] google-adk not installed — printing ADK composition only
+[           adk] ParallelAgent(sub_churn, sub_offer, sub_contract)
+[           adk]   → SequentialAgent → MergeAgent (deterministic merge)
+[           adk]   → Output: RenewalDecision
+[          note] Install google-adk and re-run for a live execution.

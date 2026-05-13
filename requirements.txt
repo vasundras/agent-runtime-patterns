@@ -1,0 +1,19 @@
+# Core
+pydantic>=2.5
+typing-extensions>=4.9
+
+# LangGraph stack (P1-P5)
+langgraph>=0.2.0
+langchain-core>=0.3.0
+langchain-anthropic>=0.2.0
+langchain-openai>=0.2.0
+
+# Google ADK (P1 variant, P6)
+google-adk>=0.1.0  # Comment out if unavailable in your environment; ADK examples have a stub fallback
+
+# Async + retry
+anyio>=4.0
+tenacity>=8.2
+
+# Optional: for the contract-renewal example
+sqlmodel>=0.0.16

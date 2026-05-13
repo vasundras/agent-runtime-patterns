@@ -1,0 +1,7 @@
+[         store] transition  id='r-001' state='scoring' v=1
+[         store] transition  id='r-001' state='human_required' v=2
+[         store] timer scheduled  id='r-001' target='expired' at_v=2
+[           ---] specialist override happens
+[         store] transition  id='r-001' state='offer_sent' v=3
+[         store] timer SKIPPED — row moved on  id='r-001' scheduled_at_v=2 now_v=3
+[         final] row state  row=Row(id='r-001', state='offer_sent', version=3, data={'score': 0.72, 'reason': 'discount over policy', 'override_by': 'u.k.chen'}, pending_timer=None)

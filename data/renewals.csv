@@ -1,0 +1,101 @@
+renewal_id,customer_id,window_open_at,current_state,version,model_version,expected_path,mrr_usd,contract_type,tenure_months,churn_label
+r-2be9ac8c,7493-TPUWZ,2026-04-13T00:00:00Z,scoring,1,claude-sonnet-4-6,churned,79.15,Month-to-month,1,Yes
+r-57e7a101,8224-KDLKN,2026-05-13T00:00:00Z,window_open,1,claude-sonnet-4-6,renewed,25,Two year,72,No
+r-53151ca0,5067-WJEUN,2026-04-13T00:00:00Z,window_open,1,claude-sonnet-4-6,renewed,54.2,Two year,67,No
+r-36e0f905,3351-NQLDI,2026-04-13T00:00:00Z,window_open,1,claude-sonnet-4-6,escalated,94.35,One year,67,Yes
+r-7ec60e81,0289-IVARM,2026-03-14T00:00:00Z,scoring,1,claude-sonnet-4-6,renewed,60.55,Month-to-month,35,No
+r-5bff2cfa,1557-EMYVT,2026-04-13T00:00:00Z,window_open,1,claude-sonnet-4-6,renewed_with_offer,115.05,Two year,43,No
+r-818ba9e8,6087-YPWHO,2026-05-13T00:00:00Z,window_open,1,claude-sonnet-4-6,renewed,68.15,Two year,72,No
+r-0d1c0412,7563-BIUPC,2026-03-14T00:00:00Z,scoring,1,claude-sonnet-4-6,churned,80.6,Month-to-month,5,Yes
+r-a2a17b2c,1818-ESQMW,2026-05-13T00:00:00Z,scoring,1,claude-sonnet-4-6,renewed_with_offer,89.2,Month-to-month,27,No
+r-312002cd,9207-ZPANB,2026-04-13T00:00:00Z,window_open,1,claude-sonnet-4-6,renewed,67.45,One year,37,No
+r-4e71b0ef,5387-ASZNZ,2026-05-13T00:00:00Z,window_open,1,claude-sonnet-4-6,renewed,63.85,One year,66,No
+r-f554976e,7623-TRNQN,2026-04-13T00:00:00Z,scoring,1,claude-sonnet-4-6,churned,49.9,Month-to-month,1,Yes
+r-d714867d,3179-GBRWV,2026-05-13T00:00:00Z,scoring,1,claude-sonnet-4-6,renewed,64.95,Month-to-month,21,No
+r-13af045a,0902-RFHOF,2026-03-14T00:00:00Z,window_open,1,claude-sonnet-4-6,renewed,20.1,One year,38,No
+r-439f321b,8404-GFGCZ,2026-04-13T00:00:00Z,scoring,1,claude-sonnet-4-6,renewed,65.6,Month-to-month,4,No
+r-b7c74692,6650-BWFRT,2026-05-13T00:00:00Z,window_open,1,claude-sonnet-4-6,renewed_with_offer,117.15,Two year,72,No
+r-0fb9b4fb,4213-HKBJO,2026-05-13T00:00:00Z,window_open,1,claude-sonnet-4-6,renewed,25.7,Two year,33,No
+r-2aa65f03,8627-ZYGSZ,2026-03-14T00:00:00Z,window_open,1,claude-sonnet-4-6,renewed_with_offer,78.9,One year,47,No
+r-5377e601,5028-GZLDO,2026-03-14T00:00:00Z,scoring,1,claude-sonnet-4-6,churned,70.7,Month-to-month,2,Yes
+r-d7026397,4143-OOBWZ,2026-03-14T00:00:00Z,scoring,1,claude-sonnet-4-6,churned,81.3,Month-to-month,5,Yes
+r-a0cc9f44,5804-LEPIM,2026-03-14T00:00:00Z,scoring,1,claude-sonnet-4-6,churned,70.35,Month-to-month,2,Yes
+r-b4f7e135,8464-EETCQ,2026-05-13T00:00:00Z,window_open,1,claude-sonnet-4-6,renewed,18.8,Two year,57,No
+r-ed9b9163,2739-CACDQ,2026-03-14T00:00:00Z,scoring,1,claude-sonnet-4-6,renewed_with_offer,82.65,Month-to-month,17,No
+r-18e705fb,6754-LZUKA,2026-04-13T00:00:00Z,window_open,1,claude-sonnet-4-6,renewed_with_offer,80.9,Two year,61,No
+r-63e91448,9498-FIMXL,2026-03-14T00:00:00Z,init,1,claude-sonnet-4-6,renewed,19.2,One year,8,No
+r-00e5502b,2642-DTVCO,2026-05-13T00:00:00Z,scoring,1,claude-sonnet-4-6,churned,85.05,Month-to-month,9,Yes
+r-c36cf8b4,5935-FCCNB,2026-03-14T00:00:00Z,scoring,1,claude-sonnet-4-6,renewed_with_offer,94.2,Month-to-month,17,No
+r-75185ebe,5485-ITNPC,2026-05-13T00:00:00Z,window_open,1,claude-sonnet-4-6,renewed_with_offer,85.9,Two year,66,No
+r-8999f592,0943-ZQPXH,2026-03-14T00:00:00Z,scoring,1,claude-sonnet-4-6,renewed_with_offer,92.95,Month-to-month,44,No
+r-dfd75fbf,1563-IWQEX,2026-05-13T00:00:00Z,scoring,1,claude-sonnet-4-6,renewed,19.7,Month-to-month,12,No
+r-06eb851e,7851-FLGGQ,2026-04-13T00:00:00Z,scoring,1,claude-sonnet-4-6,churned,44.65,Month-to-month,1,Yes
+r-6c1f3ff8,4135-FRWKJ,2026-04-13T00:00:00Z,window_open,1,claude-sonnet-4-6,renewed_with_offer,76.25,One year,55,No
+r-29ee1eb4,5156-UMKOW,2026-05-13T00:00:00Z,scoring,1,claude-sonnet-4-6,renewed,29.65,Month-to-month,3,No
+r-e4476502,2011-TRQYE,2026-05-13T00:00:00Z,scoring,1,claude-sonnet-4-6,churned,33.5,Month-to-month,18,Yes
+r-68150d7e,9919-YLNNG,2026-05-13T00:00:00Z,scoring,1,claude-sonnet-4-6,restructured,103.8,Month-to-month,42,No
+r-65a722c1,5893-PYOLZ,2026-03-14T00:00:00Z,window_open,1,claude-sonnet-4-6,renewed_with_offer,81.8,Two year,56,No
+r-75505fcf,2969-QWUBZ,2026-03-14T00:00:00Z,scoring,1,claude-sonnet-4-6,renewed,51.4,Month-to-month,2,No
+r-e7018737,5924-SNGKP,2026-03-14T00:00:00Z,window_open,1,claude-sonnet-4-6,renewed,20.25,One year,41,No
+r-d2a24f53,7136-RVDTZ,2026-04-13T00:00:00Z,window_open,1,claude-sonnet-4-6,escalated,45.25,One year,70,Yes
+r-9d1ba65b,2034-GDRCN,2026-03-14T00:00:00Z,scoring,1,claude-sonnet-4-6,churned,90.4,Month-to-month,2,Yes
+r-dc524ae9,4581-SSPWD,2026-05-13T00:00:00Z,scoring,1,claude-sonnet-4-6,churned,75.8,Month-to-month,3,Yes
+r-b0e58e6d,1022-RKXDR,2026-03-14T00:00:00Z,window_open,1,claude-sonnet-4-6,renewed,24.85,One year,41,No
+r-4a27da6c,7244-KXYZN,2026-05-13T00:00:00Z,window_open,1,claude-sonnet-4-6,renewed,20.45,One year,24,No
+r-5e5c07ba,3258-ZKPAI,2026-05-13T00:00:00Z,window_open,1,claude-sonnet-4-6,renewed_with_offer,116.6,Two year,72,No
+r-f8c6293a,4091-TVOCN,2026-05-13T00:00:00Z,window_open,1,claude-sonnet-4-6,renewed_with_offer,78.75,One year,48,No
+r-da50b19e,6728-CZFEI,2026-05-13T00:00:00Z,window_open,1,claude-sonnet-4-6,renewed,56.15,One year,15,No
+r-a37260da,8382-SHQEH,2026-03-14T00:00:00Z,scoring,1,claude-sonnet-4-6,churned,84.9,Month-to-month,8,Yes
+r-035cb951,5141-ZUVBH,2026-05-13T00:00:00Z,scoring,1,claude-sonnet-4-6,renewed_with_offer,93,Month-to-month,9,No
+r-6e8399b9,3166-PNEOF,2026-04-13T00:00:00Z,window_open,1,claude-sonnet-4-6,renewed_with_offer,86.45,Two year,61,No
+r-5a0754d9,3212-KXOCR,2026-04-13T00:00:00Z,window_open,1,claude-sonnet-4-6,renewed,21,Two year,52,No
+r-4c7ad1a3,8780-YRMTT,2026-05-13T00:00:00Z,window_open,1,claude-sonnet-4-6,renewed,47.4,Two year,66,No
+r-2b6b890d,2428-HYUNX,2026-03-14T00:00:00Z,window_open,1,claude-sonnet-4-6,renewed,19.35,Two year,44,No
+r-d9a91fe5,9833-TGFHX,2026-05-13T00:00:00Z,window_open,1,claude-sonnet-4-6,renewed_with_offer,97.1,One year,42,No
+r-c74a0112,0733-VUNUW,2026-05-13T00:00:00Z,scoring,1,claude-sonnet-4-6,churned,55.65,Month-to-month,24,Yes
+r-51fa999b,5229-DTFYB,2026-03-14T00:00:00Z,window_open,1,claude-sonnet-4-6,renewed_with_offer,98.8,Two year,41,No
+r-17a88c7f,2296-DKZFP,2026-03-14T00:00:00Z,window_open,1,claude-sonnet-4-6,renewed_with_offer,71,Two year,65,No
+r-45c7d2a0,8290-YWKHZ,2026-03-14T00:00:00Z,scoring,1,claude-sonnet-4-6,churned,93.2,Month-to-month,32,Yes
+r-bc5fdab7,6652-YFFJO,2026-03-14T00:00:00Z,scoring,1,claude-sonnet-4-6,renewed,64.9,Month-to-month,11,No
+r-6f0751dc,2346-LOCWC,2026-04-13T00:00:00Z,window_open,1,claude-sonnet-4-6,renewed,20.5,Two year,58,No
+r-8e8dbc0e,8626-PTQGE,2026-05-13T00:00:00Z,window_open,1,claude-sonnet-4-6,renewed,60.05,Two year,69,No
+r-651c01d5,2995-YWTCD,2026-04-13T00:00:00Z,init,1,claude-sonnet-4-6,renewed,24.9,Two year,19,No
+r-e8077714,2495-TTHBQ,2026-04-13T00:00:00Z,init,1,claude-sonnet-4-6,renewed,20.4,One year,4,No
+r-bb6d536d,9898-KZQDZ,2026-04-13T00:00:00Z,scoring,1,claude-sonnet-4-6,churned,94.55,Month-to-month,40,Yes
+r-3a114051,1855-CFULU,2026-04-13T00:00:00Z,scoring,1,claude-sonnet-4-6,renewed,20.05,Month-to-month,4,No
+r-cb01bf97,4846-WHAFZ,2026-04-13T00:00:00Z,scoring,1,claude-sonnet-4-6,churned,76.5,Month-to-month,37,Yes
+r-6fc95f12,1872-EBWSC,2026-03-14T00:00:00Z,window_open,1,claude-sonnet-4-6,renewed,20.35,One year,29,No
+r-fbe0700a,0562-HKHML,2026-03-14T00:00:00Z,window_open,1,claude-sonnet-4-6,renewed,23.9,Two year,71,No
+r-1b621ec7,6862-CQUMB,2026-04-13T00:00:00Z,scoring,1,claude-sonnet-4-6,restructured,96.1,Month-to-month,37,No
+r-85bac6c9,6172-FECYY,2026-04-13T00:00:00Z,scoring,1,claude-sonnet-4-6,churned,84.5,Month-to-month,49,Yes
+r-44d2587e,6158-HDPXZ,2026-04-13T00:00:00Z,scoring,1,claude-sonnet-4-6,renewed,25.35,Month-to-month,1,No
+r-3a8ee151,1628-BIZYP,2026-04-13T00:00:00Z,scoring,1,claude-sonnet-4-6,renewed_with_offer,85,Month-to-month,1,No
+r-64cc4601,1583-IHQZE,2026-05-13T00:00:00Z,scoring,1,claude-sonnet-4-6,churned,112.95,Month-to-month,12,Yes
+r-5609b922,8234-GSZYK,2026-04-13T00:00:00Z,window_open,1,claude-sonnet-4-6,renewed,26.45,Two year,43,No
+r-909f87a5,0872-CASZJ,2026-03-14T00:00:00Z,window_open,1,claude-sonnet-4-6,renewed,69.1,One year,59,No
+r-b3bb2472,1343-EHPYB,2026-05-13T00:00:00Z,scoring,1,claude-sonnet-4-6,churned,103.4,Month-to-month,63,Yes
+r-eed759e8,9494-MRNYX,2026-04-13T00:00:00Z,scoring,1,claude-sonnet-4-6,renewed_with_offer,75.05,Month-to-month,10,No
+r-da5317b6,6586-MYGKD,2026-04-13T00:00:00Z,window_open,1,claude-sonnet-4-6,renewed_with_offer,76.95,Two year,70,No
+r-d25bf0f3,1821-BUCWY,2026-05-13T00:00:00Z,window_open,1,claude-sonnet-4-6,renewed,55.65,Two year,30,No
+r-bb77c141,8628-MFKAX,2026-05-13T00:00:00Z,window_open,1,claude-sonnet-4-6,renewed_with_offer,116.75,Two year,72,No
+r-fda85a85,3930-ZGWVE,2026-04-13T00:00:00Z,scoring,1,claude-sonnet-4-6,renewed,19.75,Month-to-month,1,No
+r-c0d242f0,7629-WIXZF,2026-04-13T00:00:00Z,init,1,claude-sonnet-4-6,renewed,59.1,One year,7,No
+r-3faac6ba,6080-LNESI,2026-05-13T00:00:00Z,window_open,1,claude-sonnet-4-6,renewed,24.75,Two year,51,No
+r-c2a7eb72,5522-JBWMO,2026-04-13T00:00:00Z,scoring,1,claude-sonnet-4-6,renewed,44,Month-to-month,1,No
+r-0b0a349b,0011-IGKFF,2026-04-13T00:00:00Z,scoring,1,claude-sonnet-4-6,churned,98,Month-to-month,13,Yes
+r-8c272f6a,9774-NRNAU,2026-05-13T00:00:00Z,scoring,1,claude-sonnet-4-6,renewed_with_offer,84.8,Month-to-month,27,No
+r-f153c27a,2931-FSOHN,2026-04-13T00:00:00Z,scoring,1,claude-sonnet-4-6,renewed,59.9,Month-to-month,13,No
+r-8ce7426b,0187-WZNAB,2026-05-13T00:00:00Z,scoring,1,claude-sonnet-4-6,renewed_with_offer,74.4,Month-to-month,27,No
+r-f4b299f3,0674-DGMAQ,2026-03-14T00:00:00Z,scoring,1,claude-sonnet-4-6,renewed_with_offer,93.5,Month-to-month,32,No
+r-c99b60a6,6576-FBXOJ,2026-03-14T00:00:00Z,window_open,1,claude-sonnet-4-6,renewed,54.6,One year,17,No
+r-f87be1e9,0623-IIHUG,2026-05-13T00:00:00Z,scoring,1,claude-sonnet-4-6,churned,41.9,Month-to-month,21,Yes
+r-1b8fc872,4062-HBMOS,2026-04-13T00:00:00Z,scoring,1,claude-sonnet-4-6,restructured,103.05,Month-to-month,52,No
+r-58dd0674,4396-KLSEH,2026-04-13T00:00:00Z,scoring,1,claude-sonnet-4-6,renewed,19.85,Month-to-month,4,No
+r-ce535a4a,4445-ZJNMU,2026-05-13T00:00:00Z,scoring,1,claude-sonnet-4-6,restructured,99.3,Month-to-month,9,No
+r-b1d990fe,9640-ZSLDC,2026-03-14T00:00:00Z,window_open,1,claude-sonnet-4-6,renewed,60.6,One year,53,No
+r-43692133,2636-SJDOU,2026-04-13T00:00:00Z,window_open,1,claude-sonnet-4-6,renewed_with_offer,84.3,One year,64,No
+r-927c2d96,7598-UAASY,2026-03-14T00:00:00Z,scoring,1,claude-sonnet-4-6,churned,76.4,Month-to-month,2,Yes
+r-1abe1841,6877-LGWXO,2026-05-13T00:00:00Z,scoring,1,claude-sonnet-4-6,churned,78.55,Month-to-month,18,Yes
+r-4c30a61b,5495-GPSRW,2026-03-14T00:00:00Z,init,1,claude-sonnet-4-6,renewed,19.7,Two year,20,No
+r-b125bc08,2049-BAFNW,2026-04-13T00:00:00Z,scoring,1,claude-sonnet-4-6,renewed,35.9,Month-to-month,1,No
+r-93acde39,4742-DRORA,2026-05-13T00:00:00Z,window_open,1,claude-sonnet-4-6,renewed_with_offer,95.4,One year,60,No

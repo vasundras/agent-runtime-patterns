@@ -1,0 +1,8 @@
+[        peer:A] ok
+[        peer:B] TIMEOUT (simulated)
+[        peer:C] ok, wrote external billing
+[          saga] failure detected, rolling back  failed='B'
+[          saga] compensate  peer='C' system='billing' id='billing-1'
+[          saga] compensate  peer='A' system='crm' id='crm-1'
+[         final] external state after run  state={'billing': [], 'crm': [], 'email': []} rolled_back=True
+[         final] saga compensation verified ✓
