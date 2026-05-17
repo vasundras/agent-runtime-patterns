@@ -1,0 +1,11 @@
+{
+  "n_resamples": 10000,
+  "alpha": 0.05,
+  "keys": [
+    {
+      "spine": "p5",
+      "model": "claude-sonnet-4-6",
+      "n": 5
+    }
+  ]
+}

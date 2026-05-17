@@ -1,18 +1,23 @@
-"""Entry point: run the patterns through τ-bench's harness against Telco scenarios.
+"""Entry point: run the spine ablation against Telco scenarios.
 
-Without τ-bench installed, this falls back to a structural dry-run that
-exercises the adapter against a fake environment, so the file is still useful
-for sanity-checking the wiring.
+Three modes:
 
-Usage:
-  python evals/run_eval.py                 # offline dry-run, all scenarios
-  python evals/run_eval.py --k 4           # pass^k consistency over 4 trials
-  python evals/run_eval.py --limit 10      # only first 10 scenarios
+  # Offline structural dry-run (no API key required):
+  python evals/run_eval.py --limit 10 --k 1
 
-If you have τ-bench installed and an API key:
-  pip install git+https://github.com/sierra-research/tau-bench
-  export ANTHROPIC_API_KEY=...
-  python evals/run_eval.py --live --k 8
+  # Smoke test against the real Anthropic API:
+  python evals/run_eval.py --live --spine p5 --model claude-sonnet-4-6 \\
+      --limit 5 --k 1
+
+  # Lean run (one of the four-evening cells):
+  python evals/run_eval.py --live --spine p5 --model claude-sonnet-4-6 \\
+      --limit 30 --k 4
+
+Outputs:
+  evals/results/{spine}_{model}_n{N}_k{K}.jsonl     # one JSON line per scenario
+  evals/results/cost_ledger.jsonl                   # one line per LLM call
+
+See ABLATION_TIMELINE.md for the full four-evening plan and expected costs.
 """
 from __future__ import annotations
 
@@ -20,6 +25,7 @@ import argparse
 import json
 import sys
 from pathlib import Path
+from typing import Any
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parent / "patterns"))
@@ -30,57 +36,117 @@ from scenarios_telco import build_scenarios  # noqa: E402
 from tau_bench_adapter import build_agent  # noqa: E402
 
 
-class FakeEnvFromScenario:
-    """Lets us exercise the adapter offline without τ-bench installed.
+class DeterministicEnv:
+    """Single-LLM env: the spine's LLM is the only stochastic component.
 
-    Real τ-bench envs do all of this plus a simulated user LLM. Here we
-    return a fixed-trajectory env that mirrors the scenario's expected path.
+    We intentionally do NOT spin up a simulated user via a second LLM, because
+    we want the §7 Δpass^k to be attributable to the spine + model under test,
+    not to a moving user-side model. The env is deterministic and goal-shaped.
     """
 
     def __init__(self, scenario: dict):
         self.scenario = scenario
         self.step_n = 0
         self.db = dict(scenario["initial_db"])
+        self._churn_seed = 0.85 if scenario["goal"].get("outcome") in {"churned", "escalated"} else 0.4
 
     def reset(self):
         return {
             "renewal_id": self.db["renewal_id"],
             "customer_id": self.db["customer_id"],
+            "tenure": self.db.get("tenure"),
+            "monthly_charges": self.db.get("monthly_charges"),
+            "contract": self.db.get("contract"),
             "step": 0,
             "user_intent": self.scenario["user_intent"],
+            "policy_doc_summary": "Renewal v7: max 30% auto, mergers→human, M2M tenure>=12 may offer annual.",
+            "goal_hint": None,  # we don't leak the goal to the agent
         }
 
     def step(self, action: dict):
         self.step_n += 1
-        # Cheap simulator: actions modify the db; reward is +1 at goal-match.
-        if action["type"] == "score_churn":
-            churn = 0.85 if self.scenario["goal"].get("outcome") == "churned" else 0.4
-            return {"step": self.step_n, "churn_score": churn}, 0.0, False
-        if action["type"] in {"publish_offer", "accept_renewal"}:
+        a_type = action.get("type")
+
+        obs: dict[str, Any] = {"step": self.step_n}
+        if a_type == "score_churn":
+            obs["churn_score"] = self._churn_seed
+        elif a_type == "draft_offer":
+            obs["draft_status"] = "drafted"
+            self.db["last_discount"] = action.get("discount_pct", 0)
+        elif a_type in {"publish_offer", "accept_renewal"}:
             self.db["state"] = "closed"
-        if action["type"] == "expire_renewal":
+            obs["renewal_state"] = "closed"
+        elif a_type == "expire_renewal":
             self.db["state"] = "expired"
-        # done when the action is "stop" or db state matches goal terminal
-        done = self.db.get("state") in {"closed", "expired", "human_required"}
+            obs["renewal_state"] = "expired"
+        elif a_type == "request_human_review":
+            self.db["state"] = "human_required"
+            obs["renewal_state"] = "human_required"
+        elif a_type == "stop":
+            obs["agent_stop"] = True
+
+        done = a_type == "stop" or self.db.get("state") in {"closed", "expired", "human_required"}
         reward = 1.0 if self.db.get("state") == self.scenario["goal"].get("state") else 0.0
-        return {"step": self.step_n, "db_state": self.db.get("state")}, reward, done
+        obs["user_intent"] = self.scenario["user_intent"]  # keep visible across turns
+        return obs, reward, done
 
 
-def run_one(scenario: dict, k: int = 1) -> dict:
+# --- Spine selection ------------------------------------------------------
+
+def make_agent(spine: str, *, model: str | None, live: bool):
+    """Returns a callable that builds a fresh agent per trial."""
+    if not live:
+        # offline shim — uses the stub _propose_action in tau_bench_adapter
+        def builder():
+            return build_agent()
+        return builder
+
+    from llm_client import LLMClient, default_ledger
+    ledger = default_ledger(spine=spine, model=model or "unknown")
+
+    if spine == "p5":
+        from spines.p5_state_machine import P5SpineAgent
+
+        def builder():
+            client = LLMClient(model=model, spine="p5", ledger=ledger)
+            return P5SpineAgent(client=client)
+        return builder
+
+    if spine == "p3":
+        from spines.p3_event_driven import P3SpineAgent
+
+        def builder():
+            client = LLMClient(model=model, spine="p3", ledger=ledger)
+            return P3SpineAgent(client=client)
+        return builder
+
+    raise ValueError(f"unknown spine: {spine}")
+
+
+def run_one(scenario: dict, *, k: int, agent_builder, spine: str) -> dict:
     successes = 0
     trial_results = []
     for trial in range(k):
-        agent = build_agent()
-        env = FakeEnvFromScenario(scenario)
+        agent = agent_builder()
+        if hasattr(agent, "bind"):
+            agent.bind(scenario_id=scenario["task_id"], trial=trial)
+        env = DeterministicEnv(scenario)
         result = agent.solve(env)
-        # Naive goal match: did the final state align?
         matched = result.get("final_state") == scenario["goal"].get("state") or any(
             a.get("reward", 0) > 0 for a in result.get("audit", [])
         )
         successes += 1 if matched else 0
-        trial_results.append({"trial": trial, "matched": matched, "version": result["version"]})
+        trial_results.append({
+            "trial": trial,
+            "matched": matched,
+            "version": result.get("version"),
+            "final_state": result.get("final_state"),
+            "n_audit": len(result.get("audit", [])),
+        })
     return {
         "task_id": scenario["task_id"],
+        "spine": spine,
+        "goal_state": scenario["goal"].get("state"),
         "k": k,
         "pass_at_k": successes / max(k, 1),
         "trials": trial_results,
@@ -89,27 +155,36 @@ def run_one(scenario: dict, k: int = 1) -> dict:
 
 def main():
     ap = argparse.ArgumentParser()
+    ap.add_argument("--spine", choices=["p3", "p5"], default="p5",
+                    help="which spine wrapper to use (--live only)")
+    ap.add_argument("--model", default="claude-sonnet-4-6",
+                    help="anthropic model identifier (--live only)")
     ap.add_argument("--k", type=int, default=1, help="pass^k consistency (trials per scenario)")
     ap.add_argument("--limit", type=int, default=10, help="limit number of scenarios")
-    ap.add_argument("--live", action="store_true", help="use real τ-bench (requires install + API key)")
+    ap.add_argument("--live", action="store_true",
+                    help="use real Anthropic API (requires ANTHROPIC_API_KEY)")
+    ap.add_argument("--out", default=None,
+                    help="output JSONL path (default: results/{spine}_{model}_n{N}_k{K}.jsonl)")
     args = ap.parse_args()
 
-    if args.live:
-        log("eval", "live τ-bench mode not implemented in this offline shim — "
-                   "this is where you'd `from tau_bench.run import run` and pass build_agent")
-        return
-
     scenarios = build_scenarios(subset=True)[: args.limit]
-    log("eval", f"running offline dry-run on {len(scenarios)} scenarios with k={args.k}")
+    mode = "LIVE" if args.live else "OFFLINE"
+    log("eval", f"mode={mode} spine={args.spine} model={args.model} N={len(scenarios)} k={args.k}")
 
-    results = [run_one(s, k=args.k) for s in scenarios]
+    agent_builder = make_agent(args.spine, model=args.model, live=args.live)
+    results = [run_one(s, k=args.k, agent_builder=agent_builder, spine=args.spine) for s in scenarios]
     overall = sum(r["pass_at_k"] for r in results) / max(len(results), 1)
 
-    log("eval", "summary", overall_pass_at_k=round(overall, 3), scenarios=len(results))
-    out_path = HERE / "results" / f"dry_run_k{args.k}.json"
-    out_path.parent.mkdir(exist_ok=True)
+    log("eval", "summary", overall_pass_at_k=round(overall, 3),
+        scenarios=len(results), spine=args.spine, model=args.model)
+
+    safe_model = (args.model or "stub").replace("/", "-")
+    default_name = f"{args.spine}_{safe_model}_n{len(results)}_k{args.k}.jsonl"
+    out_path = Path(args.out) if args.out else HERE / "results" / default_name
+    out_path.parent.mkdir(parents=True, exist_ok=True)
     with out_path.open("w") as fh:
-        json.dump({"k": args.k, "overall": overall, "results": results}, fh, indent=2)
+        for r in results:
+            fh.write(json.dumps(r) + "\n")
     log("eval", "wrote", path=str(out_path))
 
 
