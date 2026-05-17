@@ -1,5 +1,5 @@
-{"task_id": "r-2be9ac8c", "spine": "p5", "goal_state": "expired", "k": 1, "pass_at_k": 0.0, "trials": [{"trial": 0, "matched": false, "version": 3, "final_state": "init", "n_audit": 3}]}
-{"task_id": "r-57e7a101", "spine": "p5", "goal_state": "closed", "k": 1, "pass_at_k": 0.0, "trials": [{"trial": 0, "matched": false, "version": 1, "final_state": "init", "n_audit": 1}]}
-{"task_id": "r-53151ca0", "spine": "p5", "goal_state": "closed", "k": 1, "pass_at_k": 0.0, "trials": [{"trial": 0, "matched": false, "version": 1, "final_state": "init", "n_audit": 1}]}
-{"task_id": "r-36e0f905", "spine": "p5", "goal_state": "human_required", "k": 1, "pass_at_k": 0.0, "trials": [{"trial": 0, "matched": false, "version": 3, "final_state": "init", "n_audit": 3}]}
-{"task_id": "r-7ec60e81", "spine": "p5", "goal_state": "closed", "k": 1, "pass_at_k": 0.0, "trials": [{"trial": 0, "matched": false, "version": 1, "final_state": "init", "n_audit": 1}]}
+{"task_id": "r-2be9ac8c", "spine": "p5", "goal_state": "expired", "k": 1, "pass_at_k": 0.0, "trials": [{"trial": 0, "matched": false, "version": 2, "final_state": "offer_sent", "n_audit": 2}]}
+{"task_id": "r-57e7a101", "spine": "p5", "goal_state": "closed", "k": 1, "pass_at_k": 1.0, "trials": [{"trial": 0, "matched": true, "version": 2, "final_state": "offer_sent", "n_audit": 2}]}
+{"task_id": "r-53151ca0", "spine": "p5", "goal_state": "closed", "k": 1, "pass_at_k": 1.0, "trials": [{"trial": 0, "matched": true, "version": 2, "final_state": "offer_sent", "n_audit": 2}]}
+{"task_id": "r-36e0f905", "spine": "p5", "goal_state": "human_required", "k": 1, "pass_at_k": 0.0, "trials": [{"trial": 0, "matched": false, "version": 2, "final_state": "offer_sent", "n_audit": 2}]}
+{"task_id": "r-7ec60e81", "spine": "p5", "goal_state": "closed", "k": 1, "pass_at_k": 1.0, "trials": [{"trial": 0, "matched": true, "version": 2, "final_state": "offer_sent", "n_audit": 2}]}

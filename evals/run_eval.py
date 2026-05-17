@@ -93,10 +93,37 @@ class DeterministicEnv:
 
 # --- Spine selection ------------------------------------------------------
 
-def make_agent(spine: str, *, model: str | None, live: bool):
-    """Returns a callable that builds a fresh agent per trial."""
+def make_agent(spine: str, *, model: str | None, live: bool, mock: bool = False):
+    """Returns a callable that builds a fresh agent per trial.
+
+    Three modes:
+      - mock=True       → use MockLLMClient (no API calls, scripted responses)
+                          to exercise the spine code path offline.
+      - live=True       → use real LLMClient with Anthropic SDK.
+      - neither         → use the stub _propose_action in tau_bench_adapter
+                          (legacy offline path that does not exercise the spine).
+    """
+    if mock:
+        from llm_client import MockLLMClient, default_ledger
+        ledger = default_ledger(spine=spine, model=model or "mock")
+        if spine == "p5":
+            from spines.p5_state_machine import P5SpineAgent
+
+            def builder():
+                client = MockLLMClient(model=model or "mock", spine="p5", ledger=ledger)
+                return P5SpineAgent(client=client)
+            return builder
+        if spine == "p3":
+            from spines.p3_event_driven import P3SpineAgent
+
+            def builder():
+                client = MockLLMClient(model=model or "mock", spine="p3", ledger=ledger)
+                return P3SpineAgent(client=client)
+            return builder
+        raise ValueError(f"unknown spine: {spine}")
+
     if not live:
-        # offline shim — uses the stub _propose_action in tau_bench_adapter
+        # legacy offline shim — uses the stub _propose_action in tau_bench_adapter
         def builder():
             return build_agent()
         return builder
@@ -163,15 +190,17 @@ def main():
     ap.add_argument("--limit", type=int, default=10, help="limit number of scenarios")
     ap.add_argument("--live", action="store_true",
                     help="use real Anthropic API (requires ANTHROPIC_API_KEY)")
+    ap.add_argument("--mock", action="store_true",
+                    help="use MockLLMClient to exercise the spine path offline (no API calls)")
     ap.add_argument("--out", default=None,
                     help="output JSONL path (default: results/{spine}_{model}_n{N}_k{K}.jsonl)")
     args = ap.parse_args()
 
     scenarios = build_scenarios(subset=True)[: args.limit]
-    mode = "LIVE" if args.live else "OFFLINE"
+    mode = "LIVE" if args.live else ("MOCK" if args.mock else "OFFLINE")
     log("eval", f"mode={mode} spine={args.spine} model={args.model} N={len(scenarios)} k={args.k}")
 
-    agent_builder = make_agent(args.spine, model=args.model, live=args.live)
+    agent_builder = make_agent(args.spine, model=args.model, live=args.live, mock=args.mock)
     results = [run_one(s, k=args.k, agent_builder=agent_builder, spine=args.spine) for s in scenarios]
     overall = sum(r["pass_at_k"] for r in results) / max(len(results), 1)
 

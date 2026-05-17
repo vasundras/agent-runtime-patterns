@@ -219,3 +219,52 @@ def _extract_json_object(text: str) -> dict[str, Any]:
 
 def default_ledger(spine: str, model: str) -> CostLedger:
     return CostLedger(path=HERE / "results" / "cost_ledger.jsonl")
+
+
+# --- Mock client for offline spine testing ---------------------------------
+
+class MockLLMClient:
+    """Deterministic stand-in for LLMClient.
+
+    Used by `run_eval.py --mock` to exercise the spine code path without making
+    real API calls. Each spine has its own scripted response policy that walks
+    a happy-path trajectory through the renewal flow.
+    """
+
+    def __init__(self, model: str, spine: str, ledger: CostLedger | None = None):
+        self.model = model
+        self.spine = spine
+        self.ledger = ledger
+        self._call_count: dict[str, int] = {}
+
+    def propose(self, *, system: str, user: str, scenario_id: str, trial: int) -> CallResult:
+        key = f"{scenario_id}:{trial}"
+        n = self._call_count.get(key, 0)
+        self._call_count[key] = n + 1
+
+        if self.spine == "p5":
+            # Walk: scoring → offer_sent → closed → done.
+            script = [
+                {"to_state": "scoring", "reason": "mock"},
+                {"to_state": "offer_sent", "data_patch": {"discount_pct": 15}, "reason": "mock"},
+                {"to_state": "closed", "reason": "mock"},
+            ]
+        else:  # p3
+            script = [
+                {"event_type": "score_churn", "payload": {}, "reason": "mock"},
+                {"event_type": "draft_offer", "payload": {"discount_pct": 15}, "reason": "mock"},
+                {"event_type": "publish_offer", "payload": {"discount_pct": 15}, "reason": "mock"},
+                {"event_type": "accept_renewal", "payload": {}, "reason": "mock"},
+            ]
+        parsed = script[n] if n < len(script) else {"type": "stop", "reason": "mock_exhausted"}
+
+        if self.ledger is not None:
+            self.ledger.record(
+                spine=self.spine, model=self.model,
+                input_tokens=42, output_tokens=12, latency_ms=1,
+                scenario_id=scenario_id, trial=trial, error=None,
+            )
+        return CallResult(
+            parsed=parsed, raw_text=json.dumps(parsed),
+            input_tokens=42, output_tokens=12, latency_ms=1, model=self.model,
+        )

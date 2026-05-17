@@ -32,7 +32,20 @@ from llm_client import LLMClient  # noqa: E402
 
 # Reuse the canonical state machine from the pattern example.
 sys.path.insert(0, str(HERE / "patterns" / "p5-shared-state-machine"))
-from langgraph_example import ALLOWED_TRANSITIONS  # noqa: E402
+from langgraph_example import ALLOWED_TRANSITIONS as _CANONICAL_TRANSITIONS  # noqa: E402
+
+# The data layer (`data/load_telco.py:initial_state_for`) emits scenarios with
+# `state ∈ {"init", "window_open", "scoring"}`. The canonical state machine in
+# the pattern example starts at "pending". We extend the transition map with
+# data-layer aliases so a fresh scenario's first turn has a legal proposal
+# instead of falling into a terminal-state stop.
+SPINE_ALLOWED_TRANSITIONS = {
+    "init":        {"scoring"},
+    "pending":     {"scoring"},
+    "window_open": {"scoring"},
+    **_CANONICAL_TRANSITIONS,
+}
+ALLOWED_TRANSITIONS = SPINE_ALLOWED_TRANSITIONS  # backward-compatible name
 
 
 SYSTEM_PROMPT = """You are the renewal agent for a telco carrier.
