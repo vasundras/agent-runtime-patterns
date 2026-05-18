@@ -40,14 +40,13 @@ import subprocess
 import sys
 import time
 from pathlib import Path
-from typing import Iterable
+from typing import Any, Iterable
 
 HERE = Path(__file__).resolve().parent
 
 
-def run_cell(*, spine: str, model: str, limit: int, k: int, results_dir: Path,
-             live: bool, mock: bool) -> int:
-    """Invoke run_eval.py for one (spine, model, N, k) cell. Returns exit code."""
+def _cell_cmd(*, spine: str, model: str, limit: int, k: int, results_dir: Path,
+              live: bool, mock: bool) -> list[str]:
     cmd = [sys.executable, str(HERE / "run_eval.py"),
            "--spine", spine, "--model", model,
            "--limit", str(limit), "--k", str(k),
@@ -56,9 +55,77 @@ def run_cell(*, spine: str, model: str, limit: int, k: int, results_dir: Path,
         cmd.append("--live")
     if mock:
         cmd.append("--mock")
+    return cmd
+
+
+def run_cell(*, spine: str, model: str, limit: int, k: int, results_dir: Path,
+             live: bool, mock: bool) -> int:
+    """Sequentially: invoke run_eval.py for one cell, stream output to terminal."""
+    cmd = _cell_cmd(spine=spine, model=model, limit=limit, k=k,
+                    results_dir=results_dir, live=live, mock=mock)
     print(f"\n=== Cell: spine={spine} model={model} N={limit} k={k} live={live} mock={mock} ===")
     print("$", " ".join(cmd))
     return subprocess.call(cmd)
+
+
+def run_cells_parallel(cell_specs: list[dict], *, results_dir: Path,
+                       live: bool, mock: bool) -> int:
+    """Launch all cells as background subprocesses, tee each to its own log file,
+    wait for all, return non-zero if any failed.
+
+    Per-cell log: {results_dir}/_logs/{spine}_{model}.log
+    """
+    log_dir = results_dir / "_logs"
+    log_dir.mkdir(parents=True, exist_ok=True)
+
+    procs: list[tuple[dict, subprocess.Popen, Any]] = []
+    print(f"\n=== Launching {len(cell_specs)} cells in parallel ===")
+    for spec in cell_specs:
+        cmd = _cell_cmd(results_dir=results_dir, live=live, mock=mock, **spec)
+        log_name = f"{spec['spine']}_{spec['model']}.log"
+        log_path = log_dir / log_name
+        print(f"  → {spec['spine']} {spec['model']} N={spec['limit']} k={spec['k']}  →  {log_path}")
+        log_fh = log_path.open("w", buffering=1)  # line-buffered
+        log_fh.write(f"# cmd: {' '.join(cmd)}\n")
+        log_fh.flush()
+        proc = subprocess.Popen(cmd, stdout=log_fh, stderr=subprocess.STDOUT)
+        procs.append((spec, proc, log_fh))
+
+    # Progress poll while waiting.
+    print(f"\n=== Waiting for {len(procs)} cells to finish (tail logs in {log_dir}) ===")
+    print(f"=== Monitor with: tail -f {log_dir}/*.log ===\n")
+
+    t0 = time.time()
+    last_print = 0.0
+    while any(p.poll() is None for _, p, _ in procs):
+        time.sleep(5)
+        # Print combined status every 30s.
+        if time.time() - last_print > 30:
+            elapsed = int(time.time() - t0)
+            for spec, proc, _ in procs:
+                jsonl_name = f"{spec['spine']}_{spec['model'].replace('/', '-')}_n{spec['limit']}_k{spec['k']}.jsonl"
+                jsonl_path = results_dir / jsonl_name
+                n_done = 0
+                if jsonl_path.exists():
+                    with jsonl_path.open() as fh:
+                        n_done = sum(1 for _ in fh)
+                status = "DONE" if proc.poll() is not None else "running"
+                print(f"  [{elapsed:4d}s] {spec['spine']} {spec['model']}: {n_done}/{spec['limit']} {status}")
+            print()
+            last_print = time.time()
+
+    # Final reap.
+    last_rc = 0
+    for spec, proc, log_fh in procs:
+        rc = proc.wait()
+        log_fh.close()
+        if rc != 0:
+            print(f"  ! cell failed: {spec['spine']} {spec['model']} rc={rc} — see log")
+            last_rc = last_rc or rc
+        else:
+            print(f"  ✓ cell done:   {spec['spine']} {spec['model']}")
+    print(f"\n=== Parallel batch done in {int(time.time() - t0)}s ===")
+    return last_rc
 
 
 def smoke(results_dir: Path, *, live: bool, mock: bool) -> int:
@@ -67,25 +134,45 @@ def smoke(results_dir: Path, *, live: bool, mock: bool) -> int:
                     results_dir=results_dir, live=live, mock=mock)
 
 
-def lean(results_dir: Path, *, live: bool, mock: bool) -> int:
+def _lean_specs() -> list[dict]:
+    return [
+        {"spine": "p5", "model": "claude-sonnet-4-6", "limit": 30, "k": 4},
+        {"spine": "p3", "model": "claude-sonnet-4-6", "limit": 30, "k": 4},
+        {"spine": "p5", "model": "claude-sonnet-4-5", "limit": 30, "k": 4},
+        {"spine": "p3", "model": "claude-sonnet-4-5", "limit": 30, "k": 4},
+    ]
+
+
+def _full_specs() -> list[dict]:
+    return [
+        {"spine": "p5", "model": "claude-sonnet-4-6", "limit": 100, "k": 4},
+        {"spine": "p3", "model": "claude-sonnet-4-6", "limit": 100, "k": 4},
+        {"spine": "p5", "model": "claude-sonnet-4-5", "limit": 100, "k": 4},
+        {"spine": "p3", "model": "claude-sonnet-4-5", "limit": 100, "k": 4},
+    ]
+
+
+def lean(results_dir: Path, *, live: bool, mock: bool, parallel: bool) -> int:
     """30 scenarios, k=4, both spines, both models."""
+    specs = _lean_specs()
+    if parallel:
+        return run_cells_parallel(specs, results_dir=results_dir, live=live, mock=mock)
     last_rc = 0
-    for model in ("claude-sonnet-4-6", "claude-sonnet-4-5"):
-        for spine in ("p5", "p3"):
-            rc = run_cell(spine=spine, model=model, limit=30, k=4,
-                          results_dir=results_dir, live=live, mock=mock)
-            last_rc = last_rc or rc
+    for s in specs:
+        rc = run_cell(results_dir=results_dir, live=live, mock=mock, **s)
+        last_rc = last_rc or rc
     return last_rc
 
 
-def full(results_dir: Path, *, live: bool, mock: bool) -> int:
+def full(results_dir: Path, *, live: bool, mock: bool, parallel: bool) -> int:
     """100 scenarios, k=4, both spines, both models."""
+    specs = _full_specs()
+    if parallel:
+        return run_cells_parallel(specs, results_dir=results_dir, live=live, mock=mock)
     last_rc = 0
-    for model in ("claude-sonnet-4-6", "claude-sonnet-4-5"):
-        for spine in ("p5", "p3"):
-            rc = run_cell(spine=spine, model=model, limit=100, k=4,
-                          results_dir=results_dir, live=live, mock=mock)
-            last_rc = last_rc or rc
+    for s in specs:
+        rc = run_cell(results_dir=results_dir, live=live, mock=mock, **s)
+        last_rc = last_rc or rc
     return last_rc
 
 
@@ -125,6 +212,9 @@ def main():
                     help="use MockLLMClient (no API calls, structural check)")
     ap.add_argument("--auto-proceed", action="store_true",
                     help="skip the human gate between lean and full")
+    ap.add_argument("--parallel", action="store_true",
+                    help="run the 4 cells of lean/full concurrently as background processes. "
+                         "Wall clock drops ~4x; total cost is unchanged. Recommended for live runs.")
     args = ap.parse_args()
 
     if not args.live and not args.mock:
@@ -159,7 +249,7 @@ def main():
             sys.exit(rc)
 
     if args.stage in ("lean", "all"):
-        rc = lean(results_dir, live=args.live, mock=args.mock)
+        rc = lean(results_dir, live=args.live, mock=args.mock, parallel=args.parallel)
         if rc != 0:
             print(f"lean stage failed rc={rc}; aborting before full.")
             sys.exit(rc)
@@ -169,7 +259,7 @@ def main():
             return
 
     if args.stage in ("full", "all"):
-        rc = full(results_dir, live=args.live, mock=args.mock)
+        rc = full(results_dir, live=args.live, mock=args.mock, parallel=args.parallel)
         if rc != 0:
             print(f"full stage failed rc={rc}.")
 

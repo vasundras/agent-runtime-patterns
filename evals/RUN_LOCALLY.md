@@ -1,6 +1,25 @@
 # Running the §7 ablation locally on your Mac
 
-This is the recommended path for the lean and full stages. More reliable than Colab for unattended runs because your Mac doesn't disconnect.
+The recommended path. More reliable than Colab and the **`--parallel` flag finishes the lean stage in ~25-40 minutes wall clock instead of ~90 minutes sequential**, for the same cost.
+
+## TL;DR — one command for the lean stage in under an hour
+
+```bash
+cd ~/agent-runtime-patterns
+git pull
+export ANTHROPIC_API_KEY="sk-ant-..."
+mkdir -p ~/agent-runtime-results
+
+python3 evals/run_full_ablation.py \
+    --results-dir ~/agent-runtime-results \
+    --stage lean \
+    --live \
+    --parallel
+```
+
+That launches 4 cells (P5+P3 × Sonnet 4.6+4.5, N=30, k=4) concurrently, writes per-scenario JSONL streams, prints a heartbeat every 30 seconds, and produces `summary.md` with bootstrap CIs at the end. Expected cost ≈$3. Expected wall clock 25-40 min depending on your API tier's rate limits.
+
+You can leave it foregrounded and watch the heartbeats, or background it with `nohup` (below) and check `tail ~/agent-runtime-results/_logs/*.log` periodically.
 
 ## One-time setup
 
@@ -39,17 +58,24 @@ tail -f ~/agent-runtime-results/smoke.log
 # (Ctrl-C to stop tailing — the run continues in the background)
 ```
 
-Once smoke is clean, kick off lean overnight:
+Once smoke is clean, kick off lean. **Use `--parallel` to bring wall clock from ~90 min to ~25-40 min:**
 
 ```bash
 caffeinate -i nohup python3 evals/run_full_ablation.py \
     --results-dir ~/agent-runtime-results \
     --stage lean \
     --live \
+    --parallel \
     > ~/agent-runtime-results/lean.log 2>&1 &
 
 # Note the PID so you can check on it / kill it later
 echo "Started lean run, PID=$!"
+```
+
+Per-cell logs land in `~/agent-runtime-results/_logs/{spine}_{model}.log`. Tail them in parallel:
+
+```bash
+tail -f ~/agent-runtime-results/_logs/*.log
 ```
 
 In the morning, check the log and decide:
@@ -66,6 +92,7 @@ caffeinate -i nohup python3 evals/run_full_ablation.py \
     --results-dir ~/agent-runtime-results \
     --stage full \
     --live \
+    --parallel \
     --auto-proceed \
     > ~/agent-runtime-results/full.log 2>&1 &
 ```
