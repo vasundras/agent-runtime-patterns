@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import random
 import re
 import sys
@@ -30,7 +31,7 @@ from statistics import mean
 from typing import Any
 
 HERE = Path(__file__).resolve().parent
-RESULTS = HERE / "results"
+RESULTS = Path(os.environ.get("EVAL_RESULTS_DIR")) if os.environ.get("EVAL_RESULTS_DIR") else HERE / "results"
 
 FNAME_RE = re.compile(r"^(?P<spine>p[35])_(?P<model>[\w\-\.]+)_n(?P<n>\d+)_k(?P<k>\d+)\.jsonl$")
 
@@ -166,7 +167,13 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--bootstrap", type=int, default=10000)
     ap.add_argument("--alpha", type=float, default=0.05)
+    ap.add_argument("--results-dir", default=None,
+                    help="root dir for result files (default: $EVAL_RESULTS_DIR or evals/results)")
     args = ap.parse_args()
+
+    if args.results_dir:
+        global RESULTS
+        RESULTS = Path(args.results_dir)
 
     random.seed(42)
     by_key = load_results()

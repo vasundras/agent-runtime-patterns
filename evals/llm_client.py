@@ -218,7 +218,14 @@ def _extract_json_object(text: str) -> dict[str, Any]:
 
 
 def default_ledger(spine: str, model: str) -> CostLedger:
-    return CostLedger(path=HERE / "results" / "cost_ledger.jsonl")
+    """Cost ledger path. Respects EVAL_RESULTS_DIR env var if set.
+
+    On Colab we point EVAL_RESULTS_DIR at a Drive mount so the ledger survives
+    runtime shutdown. Locally it defaults to evals/results/cost_ledger.jsonl.
+    """
+    results_dir = os.environ.get("EVAL_RESULTS_DIR")
+    base = Path(results_dir) if results_dir else (HERE / "results")
+    return CostLedger(path=base / "cost_ledger.jsonl")
 
 
 # --- Mock client for offline spine testing ---------------------------------

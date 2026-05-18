@@ -14,8 +14,16 @@ Three modes:
       --limit 30 --k 4
 
 Outputs:
-  evals/results/{spine}_{model}_n{N}_k{K}.jsonl     # one JSON line per scenario
-  evals/results/cost_ledger.jsonl                   # one line per LLM call
+  {results-dir}/{spine}_{model}_n{N}_k{K}.jsonl     # one JSON line per scenario
+  {results-dir}/cost_ledger.jsonl                   # one line per LLM call
+
+Streaming + resume semantics:
+  - The output JSONL is written one line at a time, fsync'd between writes.
+  - On restart, existing lines are read first and their task_ids are skipped.
+  - So a run interrupted at scenario 70 of 100 loses 0 work — re-running picks up
+    at scenario 71 with no double-spend.
+  - Set --results-dir to a Drive-mounted path on Colab so writes survive runtime
+    shutdown without an explicit save cell.
 
 See ABLATION_TIMELINE.md for the full four-evening plan and expected costs.
 """
@@ -23,7 +31,9 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
+import time
 from pathlib import Path
 from typing import Any
 
@@ -180,6 +190,29 @@ def run_one(scenario: dict, *, k: int, agent_builder, spine: str) -> dict:
     }
 
 
+def _load_existing_task_ids(out_path: Path) -> set[str]:
+    """Return task_ids already present in the output JSONL.
+
+    Used for resume — we skip scenarios whose task_id already has a row so the
+    run can be interrupted and re-launched without double-spending API tokens.
+    """
+    done: set[str] = set()
+    if not out_path.exists():
+        return done
+    with out_path.open() as fh:
+        for line in fh:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                row = json.loads(line)
+                if "task_id" in row:
+                    done.add(row["task_id"])
+            except json.JSONDecodeError:
+                continue
+    return done
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--spine", choices=["p3", "p5"], default="p5",
@@ -193,28 +226,78 @@ def main():
     ap.add_argument("--mock", action="store_true",
                     help="use MockLLMClient to exercise the spine path offline (no API calls)")
     ap.add_argument("--out", default=None,
-                    help="output JSONL path (default: results/{spine}_{model}_n{N}_k{K}.jsonl)")
+                    help="output JSONL path (default: {results-dir}/{spine}_{model}_n{N}_k{K}.jsonl)")
+    ap.add_argument("--results-dir", default=None,
+                    help="root dir for all result files (default: evals/results). "
+                         "Point this at a Drive mount on Colab so writes survive runtime shutdown.")
+    ap.add_argument("--heartbeat-every", type=int, default=5,
+                    help="print a progress line every N completed scenarios (default 5)")
     args = ap.parse_args()
 
     scenarios = build_scenarios(subset=True)[: args.limit]
     mode = "LIVE" if args.live else ("MOCK" if args.mock else "OFFLINE")
     log("eval", f"mode={mode} spine={args.spine} model={args.model} N={len(scenarios)} k={args.k}")
 
-    agent_builder = make_agent(args.spine, model=args.model, live=args.live, mock=args.mock)
-    results = [run_one(s, k=args.k, agent_builder=agent_builder, spine=args.spine) for s in scenarios]
-    overall = sum(r["pass_at_k"] for r in results) / max(len(results), 1)
+    # Results dir — set env var so the LLM client's default_ledger picks it up.
+    if args.results_dir:
+        os.environ["EVAL_RESULTS_DIR"] = args.results_dir
+    results_dir = Path(args.results_dir) if args.results_dir else HERE / "results"
+    results_dir.mkdir(parents=True, exist_ok=True)
 
-    log("eval", "summary", overall_pass_at_k=round(overall, 3),
-        scenarios=len(results), spine=args.spine, model=args.model)
+    agent_builder = make_agent(args.spine, model=args.model, live=args.live, mock=args.mock)
 
     safe_model = (args.model or "stub").replace("/", "-")
-    default_name = f"{args.spine}_{safe_model}_n{len(results)}_k{args.k}.jsonl"
-    out_path = Path(args.out) if args.out else HERE / "results" / default_name
+    default_name = f"{args.spine}_{safe_model}_n{len(scenarios)}_k{args.k}.jsonl"
+    out_path = Path(args.out) if args.out else results_dir / default_name
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    with out_path.open("w") as fh:
-        for r in results:
-            fh.write(json.dumps(r) + "\n")
-    log("eval", "wrote", path=str(out_path))
+
+    # Resume: read already-written task_ids; skip them.
+    already_done = _load_existing_task_ids(out_path)
+    if already_done:
+        log("eval", f"resuming — {len(already_done)} scenarios already in {out_path.name}, skipping")
+
+    todo = [s for s in scenarios if s["task_id"] not in already_done]
+    log("eval", f"will run {len(todo)} of {len(scenarios)} scenarios")
+
+    t_start = time.time()
+    n_done = len(already_done)
+    n_passed = 0  # will be approximate (only counts this session)
+
+    with out_path.open("a") as fh:
+        for i, scenario in enumerate(todo, start=1):
+            try:
+                result = run_one(scenario, k=args.k, agent_builder=agent_builder, spine=args.spine)
+            except Exception as e:  # noqa: BLE001 — log and continue, don't lose other scenarios
+                log("eval", f"scenario crashed — recording empty result", task_id=scenario["task_id"], err=str(e))
+                result = {
+                    "task_id": scenario["task_id"],
+                    "spine": args.spine,
+                    "goal_state": scenario["goal"].get("state"),
+                    "k": args.k,
+                    "pass_at_k": 0.0,
+                    "trials": [],
+                    "error": str(e),
+                }
+            fh.write(json.dumps(result) + "\n")
+            fh.flush()
+            os.fsync(fh.fileno())  # durable on disk per scenario, not per run
+
+            n_done += 1
+            if result.get("pass_at_k", 0) > 0:
+                n_passed += 1
+
+            if i % max(args.heartbeat_every, 1) == 0 or i == len(todo):
+                elapsed = time.time() - t_start
+                rate = i / elapsed if elapsed > 0 else 0
+                eta = (len(todo) - i) / rate if rate > 0 else float("inf")
+                log("eval", f"heartbeat",
+                    progress=f"{n_done}/{len(scenarios)}",
+                    this_session=f"{i}/{len(todo)}",
+                    pass_so_far=f"{n_passed}/{i}" if i > 0 else "0/0",
+                    elapsed_s=int(elapsed),
+                    eta_s=int(eta) if eta != float("inf") else "?")
+
+    log("eval", "done", path=str(out_path), total_scenarios=n_done)
 
 
 if __name__ == "__main__":
